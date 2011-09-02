@@ -1,0 +1,7 @@
+An updated version of the example given on using updated versions of backbone and jquery-mobile and actually working with the live foursquare API. I found it difficult translating the original version that pulled in JSON from a file to something that worked off of the actual FourSquare API. I thought an example using the actual API would be helpful. 
+ 
+This example requires the help of a webserver to point /webapi/foursquare to the right spot. I have only tested this with nginx and will include my configuration but any webserver or load balancer should able to provide for this.
+
+I used foursquare's venue api v 2.0 with an oauth id. To get this example up and running you will need a foursquare ouauth id and secret. These are not included in my requests and are added by nginx to every request on the requests way out.If you don't use the nginx configuration you will need to add this yourself.
+
+I plan to add a jquery page as well which will be done entirely in javascript. This should be helpful for anyone who already has a lot of javascript (a.k.a website that they didn't start developing in their garage)
