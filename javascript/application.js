@@ -18,6 +18,7 @@
     reapplyStyles: function(el) {
       el.find('ul[data-role]').listview();
       el.find('div[data-role="fieldcontain"]').fieldcontain();
+      el.find('div[data-role="collapsible"]').collapsible();
       el.find('button[data-role="button"]').button();
       el.find('input,textarea').textinput();
       return el.page();
@@ -90,7 +91,7 @@
       this.render = __bind(this.render, this);      EditVenueView.__super__.constructor.apply(this, arguments);
       this.collection;
       this.el = app.activePage();
-      this.template = _.template('  <div data-role="fieldcontain">\n    <label>Name</label>\n    <input type="text" value="<%= venue.getName() %>" name="name" />\n  </div>\n  \n  <div data-role="fieldcontain">\n    <label>Address</label>\n    <input type="text" value="<%= venue.get(\'location\').address %>" name="address" />\n  </div>\n  \n  <div data-role="fieldcontain">\n    <label>City</label>\n    <input type="text" value="<%= venue.get(\'location\').city %>" name="city" />\n  </div>\n  \n  <div data-role="fieldcontain">\n    <label>State</label>\n    <input type="text" value="<%= venue.get(\'location\').state %>" name="state" />\n  </div>\n  \n  <button type="submit" data-role="button">Save</button>\n</form>');
+      this.template = _.template('  <div data-role="fieldcontain">\n    <label>Name</label>\n    <input type="text" value="<%= venue.getName() %>" name="name" />\n  </div>\n  \n  <div data-role="fieldcontain">\n    <label>Address</label>\n    <input type="text" value="<%= venue.get(\'location\').address %>" name="address" />\n  </div>\n \n  <div data-role="fieldcontain">\n    <label>City</label>\n    <input type="text" value="<%= venue.get(\'location\').city %>" name="city" />\n  </div>\n  \n  <div data-role="fieldcontain">\n    <label>State</label>\n    <input type="text" value="<%= venue.get(\'location\').state %>" name="state" />\n  </div>\n  \n  <button type="submit" data-role="button">Save</button>\n</form>');
       console.log("rendering view EditVenueView");
     }
     EditVenueView.prototype.events = {
@@ -124,7 +125,7 @@
       this.render = __bind(this.render, this);      ShowVenueView.__super__.constructor.apply(this, arguments);
       console.log("initializing ShowVenue for venue id: " + this.model.id);
       this.el = app.activePage();
-      this.template = _.template('<div>\n  <p>\n    <img style="width: 100%" src="<%= venue.getMapUrl() %>" />\n  </p>\n  \n  <address>\n    <%= venue.getAddress() %>\n  </address>\n\n  <ul data-role="listview" data-inset="true">\n    <li data-role="list-divider">Actions</li>\n    <li><a rel="external" href="openmap:q=<%= encodeURIComponent(venue.getAddress) %>">Open Map</a></li>\n    <li><a href="#venues-<%= venue.id %>-edit">Edit</a></li>\n  </ul>\n</div>');
+      this.template = _.template('     <div>\n       <h3><img src="<%= venue.get(\'categories\')[0].icon %>" /><%= venue.getName() %></h3>\n       <p>\n         <img style="width: 100%" src="<%= venue.getMapUrl() %>" />\n       </p>\n       \n       <address>\n         <%= venue.get(\'location\').address %><br>\n         <%= venue.get(\'location\').city %>, <%= venue.get(\'location\').state %> <%= venue.get(\'location\').postalCode %></a>\n       </address>\n    \n       <p><b>cross street:</b> <%= venue.get(\'location\').crossStreet %></p>\n       <p><b>latitude:</b> <%= venue.get(\'location\').lat %></p>\n       <p><b>longitude:</b> <%= venue.get(\'location\').lng %></p>\n       <p><b>distance:</b> <%= venue.get(\'location\').distance %></p> \n\n       <ul data-role="listview" data-inset="true">\n         <li data-role="list-divider">Actions</li>\n         <li><a rel="external" href="geo:<%= venue.get(\'location\').lat %>,<%= venue.get(\'location\').lng %>?z=8">Open Map</a></li> \n         <li><a href="#venues-<%= venue.id %>-edit">Edit</a></li>\n       </ul>\n     </div>');
       this.model.bind('change', this.render);
       console.log("rendering view ShowVenueView");
       this.render();
@@ -150,11 +151,10 @@
       });
       console.log("initializing HomeView with urls: " + JSON.stringify(venueLinks));
       this.el = app.activePage();
-      return this.template = _.template('<div>\n\n<ul data-role="listview" data-theme="c" data-filter="true">\n  <% venues.each(function(venue){ %>\n    <li><a href="#venues-<%= venue.id %>"><%= venue.getName() %></a></li>\n  <% }); %>\n</ul>\n\n</div>');
+      return this.template = _.template('<div data-role="collapsible-set">\n  <% venues.each(function(venue){ %>\n  <div data-role="collapsible" data-collapsed="false">\n    <h3><img src="<%= venue.get(\'categories\')[0].icon %>" /><%= venue.getName() %></h3>\n    <p><b>category:</b> <%= venue.get(\'categories\')[0].name %></p>\n    <p><b>phone:</b> <a href="tel:<%= venue.get(\'contact\').phone  %>"><%= venue.get(\'contact\').formattedPhone %></a></p>\n    <p><b>address:</b> <a href="#venues-<%= venue.id %>"><%= venue.get(\'location\').address %>, <%= venue.get(\'location\').city %></a>\n    <p><b>checkins:</b> <%= venue.get("stats").checkinsCount %></p>\n    <p><b>user count:</b> <%= venue.get("stats").usersCount %></p>\n    <p><b>tip count:</b> <%= venue.get("stats").tipCount %></p>\n    <ul data-role="listview" data-inset="true">\n      <li data-role="list-divider">Actions</li>\n      <li><a href="#venues-<%= venue.id %>">Show Location Info</a></li>\n      <li><a href="#venues-<%= venue.id %>-edit">Edit</a></li>\n    </ul>\n  </div>\n  <% }); %>\n</div>');
     };
     HomeView.prototype.venues = app.collections.venues;
     HomeView.prototype.render = function() {
-      console.log("rendering HomeView with venues: " + JSON.stringify(this.venues.pluck('id')));
       if (app.collections.venues.models.length > 0) {
         console.log("processing template");
         this.el.find('.ui-content').html(this.template({

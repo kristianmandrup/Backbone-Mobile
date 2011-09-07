@@ -13,6 +13,7 @@ window.app = {
   reapplyStyles: (el) ->
     el.find('ul[data-role]').listview();
     el.find('div[data-role="fieldcontain"]').fieldcontain();
+    el.find('div[data-role="collapsible"]').collapsible();
     el.find('button[data-role="button"]').button();
     el.find('input,textarea').textinput();
     el.page()
@@ -102,7 +103,7 @@ class EditVenueView extends Backbone.View
         <label>Address</label>
         <input type="text" value="<%= venue.get('location').address %>" name="address" />
       </div>
-      
+     
       <div data-role="fieldcontain">
         <label>City</label>
         <input type="text" value="<%= venue.get('location').city %>" name="city" />
@@ -164,20 +165,27 @@ class ShowVenueView extends Backbone.View
     # Get the active page from jquery mobile. We need to keep track of what this
     # dom element is so that we can refresh the page when the page is no longer active.
     @el = app.activePage()
-   
+
     @template = _.template('''
       <div>
+        <h3><img src="<%= venue.get('categories')[0].icon %>" /><%= venue.getName() %></h3>
         <p>
           <img style="width: 100%" src="<%= venue.getMapUrl() %>" />
         </p>
         
         <address>
-          <%= venue.getAddress() %>
+          <%= venue.get('location').address %><br>
+          <%= venue.get('location').city %>, <%= venue.get('location').state %> <%= venue.get('location').postalCode %></a>
         </address>
-      
+     
+        <p><b>cross street:</b> <%= venue.get('location').crossStreet %></p>
+        <p><b>latitude:</b> <%= venue.get('location').lat %></p>
+        <p><b>longitude:</b> <%= venue.get('location').lng %></p>
+        <p><b>distance:</b> <%= venue.get('location').distance %></p> 
+ 
         <ul data-role="listview" data-inset="true">
           <li data-role="list-divider">Actions</li>
-          <li><a rel="external" href="openmap:q=<%= encodeURIComponent(venue.getAddress) %>">Open Map</a></li>
+          <li><a rel="external" href="geo:<%= venue.get('location').lat %>,<%= venue.get('location').lng %>?z=8">Open Map</a></li> 
           <li><a href="#venues-<%= venue.id %>-edit">Edit</a></li>
         </ul>
       </div>
@@ -217,28 +225,37 @@ class HomeView extends Backbone.View
     console.log "initializing HomeView with urls: " + JSON.stringify(venueLinks) 
     
     @el = app.activePage()
-   
+
     @template = _.template('''
-      <div>
-      
-      <ul data-role="listview" data-theme="c" data-filter="true">
+      <div data-role="collapsible-set">
         <% venues.each(function(venue){ %>
-          <li><a href="#venues-<%= venue.id %>"><%= venue.getName() %></a></li>
+        <div data-role="collapsible" data-collapsed="false">
+          <h3><img src="<%= venue.get('categories')[0].icon %>" /><%= venue.getName() %></h3>
+          <p><b>category:</b> <%= venue.get('categories')[0].name %></p>
+          <p><b>phone:</b> <a href="tel:<%= venue.get('contact').phone  %>"><%= venue.get('contact').formattedPhone %></a></p>
+          <p><b>address:</b> <a href="#venues-<%= venue.id %>"><%= venue.get('location').address %>, <%= venue.get('location').city %></a>
+          <p><b>checkins:</b> <%= venue.get("stats").checkinsCount %></p>
+          <p><b>user count:</b> <%= venue.get("stats").usersCount %></p>
+          <p><b>tip count:</b> <%= venue.get("stats").tipCount %></p>
+          <ul data-role="listview" data-inset="true">
+            <li data-role="list-divider">Actions</li>
+            <li><a href="#venues-<%= venue.id %>">Show Location Info</a></li>
+            <li><a href="#venues-<%= venue.id %>-edit">Edit</a></li>
+          </ul>
+        </div>
         <% }); %>
-      </ul>
-      
       </div>
     ''')
 
     #@venues.bind 'change', @render
 
-  venues:  app.collections.venues;
+  venues: app.collections.venues;
   
   render: =>
-    console.log "rendering HomeView with venues: " + JSON.stringify(@venues.pluck('id')); 
-
+    
     if app.collections.venues.models.length > 0   
       console.log "processing template"
+
       @el.find('.ui-content').html(@template({venues : @venues}))
     else 
       console.log "no venues... just giving simple html"
